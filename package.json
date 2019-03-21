@@ -11,6 +11,7 @@
   "devDependencies": {
     "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.16.0"
+    "eslint-plugin-import": "^2.16.0",
+    "uuid": "3.3.2"
   }
 }

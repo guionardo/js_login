@@ -12,7 +12,12 @@
   </pre>
 
   <script>
-  
+    function callBack(msg) {
+      console.log("CALLBACK: " + msg);
+    }
+    const webLogin = new WebLogin('login.json', callBack);
+
+    webLogin.DoLogin();
   </script>
 </body>
 

@@ -1,5 +1,13 @@
 /* eslint-disable no-console */
+/**
+ * Classe de controle de logins, com conexão ao back-end para validação e uso de token
+ */
 class WebLogin {
+  /**
+   * Constructor
+   * @param {string} loginUrl URL de destino no backend
+   * @param {*} callBack função que será chamada a cada evento
+   */
   constructor(loginUrl = 'login.json', callBack = null) {
     // Nome do cookie
     this.CookieName = 'loginKey';
@@ -16,16 +24,12 @@ class WebLogin {
     // Função de retorno de status
     this.CallBack = callBack;
 
-
-    this.local = false;
-
-    this.divlog = document.getElementById('log');
-
     // Status do login
     // -1 = Não inicializado
     // 0 = Fetching (obtendo a partir do servidor)
     // 1 = Login OK
     // 2 = Erro de login
+
     this.status = 0;
 
     this.cookie_load();
@@ -37,14 +41,15 @@ class WebLogin {
     }
   }
 
+  /**
+   * Carrega as informações de login (token e validade) a partir do cookie
+   */
   cookie_load() {
     let ca = decodeURIComponent(document.cookie).split(';');
     let cookie = '';
     for (var i = 0; i < ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1);
-      }
+      var c = ca[i].trim();
+
       if (c.indexOf(this.CookieName) == 0) {
         cookie = c.substring(this.CookieName.length + 1, c.length);
         break;
@@ -59,7 +64,6 @@ class WebLogin {
         } else {
           this.ServerToken = json.token;
           this.TokenExpires = json.expires;
-          this.cookie_save();
           this.doCallBack("cookie_load OK");
           return true;
         }
@@ -98,46 +102,66 @@ class WebLogin {
       this.doCallBack("parseJSONLogin OK");
     }
   }
-  /**
-   * Obtém as informações de login do back-end
-   */
-  fetchLogin() {
-    if (this.local) {
-      return {
-        "token": "1234_",
-        "expires": "Thu, 01 Jan 2020 00:00:00 UTC",
-        "message": "Login OK"
-      };
-    }
 
-    var json = {};
-
+  fetchJSON(url, callBack, method = "GET", params = false) {
     if (self.fetch) {
-      this.status = 0;
-      fetch(this.LoginURL, { mode: 'no-cors' })
+      var ops = { method: method };
+      if (method == "POST") {
+        ops.headers = new Headers({
+          'Content-Type': 'application/x-www-form-urlencoded', // <-- Specifying the Content-Type
+        });
+      }
+      if (params) {
+        ops.body = params;
+      }
+      fetch(url, ops)
         .then(response => {
           response.text()
             .then(result => {
-              this.parseJSONLogin(result);
-            });
+              try {
+                var json = JSON.parse(result);
+                callBack(true, json);
+              } catch (e) {
+                callBack(false, "");
+              }
+            })
         });
-
     } else {
-      // Não há suporte ao fetch
+      callBack(false, "");
     }
+  }
+  /**
+   * Obtém as informações de login do back-end
+   */
+  DoLogin(userName, userPassword) {
+    this.fetchJSON(this.LoginURL, (success, json) => {
+      if (success) {
+        this.parseJSONLogin(json);
+      }
+    }, "POST", "login=1&user=" + userName + "&pass=" + userPassword);
+  }
 
-    return json;
+  DoLogout() {
+    if (this.ServerToken) {
+      this.fetchJSON(this.LoginURL, (success, json) => {
+        this.ServerToken = "";
+        this.TokenExpires = Date.parse("Thu, 01 Jan 1970 00:00:00 UTC");
+        document.cookie = this.CookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        this.doCallBack("Logout:" + success);
+      })
+    }
   }
-  DoLogin() {
-    this.fetchLogin();
+
+  CheckToken(){
+    if (this.ServerToken){
+      this.fetchJSON(this.LoginURL,(success,json)=>{
+
+      })
+    }
   }
+
 
 
 }
 
-function callBack(msg) {
-  console.log("CALLBACK: " + msg);
-}
-const webLogin = new WebLogin('login.json', callBack);
-//webLogin.downloadTest();
-webLogin.DoLogin();
+
