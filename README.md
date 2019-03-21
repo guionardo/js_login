@@ -4,5 +4,7 @@ Utilização de token armazenado em cookie
 
 1. Ao iniciar, WebLogin verifica se o cookie existe e autentica o token no servidor
 
+## Instalar servidor para testes
 
-# js_login
+* npm install http-server -g
+* http-server ./
