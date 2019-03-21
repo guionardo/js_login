@@ -10,6 +10,8 @@ Utilização de token armazenado em cookie
 * http-server ./
 * node server.js
 
+https://stackoverflow.com/questions/4720343/loading-basic-html-in-node-js
+
 ## Padrão de URL 
 
 ### Solicitação de login para o usuário com senha (POST)
