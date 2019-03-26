@@ -1,6 +1,6 @@
 # Funções para tratamento de login
 
-![Fluxograma de login](docs\Login.jpg "Fluxograma de login")
+![Fluxograma de login](docs/Login.jpg "Fluxograma de login")
 
 Utilização de token armazenado em cookie
 
