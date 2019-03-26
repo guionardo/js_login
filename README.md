@@ -16,7 +16,7 @@ JSON com a estrutura abaixo:
 ```
 {
   token:'00000000000000000...',
-  expires:'Tue, 26 Mar 2019 14:34:00 GMT',
+  expires:0000,
   data: {}
 }
 ```
@@ -26,10 +26,51 @@ JSON com a estrutura abaixo:
 ```
 {
 token:'000000000000...',
-expires:'Tue, 26 Mar 2019 14:34:00 GMT',
+expires:0000,
 data:{}
 }
 ```
+
+## Padrão de URL 
+
+### Solicitação de login para o usuário com senha (POST)
+(url)?login=userName&pass=userPassword
+
+* Retorno da solicitação pelo server auth com autorização OK (expires > 0)
+```
+{
+token:'000000000000...',
+expires:909020910,
+message:'OK',
+data:{}
+}
+```
+
+* Retorno da solicitação pelo server auth sem autorização (expires = 0 e mensagem de erro em message)
+```
+{
+token:'000000000000...',
+expires:0,
+message:'LOGIN ERROR',
+data:{}
+}
+```
+
+### Solicitação de logout para o usuário (GET)
+(url)?logout=token
+
+### Solicitação de validade do token (GET)
+(url)?check=token
+
+Na solicitação da validade do token, o servidor auth atualiza a validade, incrementando o tempo em segundos desde 01/01/1970
+```
+{
+token:'000000000000...',
+expires:0000
+}
+```
+
+
 ## Instalar servidor para testes
 
 * npm install http-server -g
@@ -42,29 +83,3 @@ data:{}
 * npm install gulp -D
 
 https://stackoverflow.com/questions/4720343/loading-basic-html-in-node-js
-
-## Padrão de URL 
-
-### Solicitação de login para o usuário com senha (POST)
-(url)?login=userName&pass=userPassword
-
-* Retorno da solicitação pelo server auth
-```
-{
-token:'000000000000...',
-expires:'Tue, 26 Mar 2019 14:34:00 GMT',
-data:{}
-}
-```
-
-### Solicitação de logout para o usuário (GET)
-(url)?logout=token
-
-### Solicitação de validade do token (GET)
-(url)?check=token
-```
-{
-token:'000000000000...',
-expires:'Tue, 26 Mar 2019 14:34:00 GMT'
-}
-```

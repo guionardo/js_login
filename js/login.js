@@ -118,18 +118,20 @@ class WebLogin {
         this.doCallBack(this.wlConsts.cookieDataInvalid);
 
       } catch (e) {
-        this.cookieRelease();
+        this.cookie_release();
         this.doCallBack(this.wlConsts.cookieLoadException + ' ' + e.message);
       }
     } else {
       // Erro no token
-      this.cookieRelease();
+      this.cookie_release();
       this.doCallBack(this.wlConsts.cookieDataInvalid);
     }
     return false;
   }
-
-  cookieRelease() {
+  /**
+   * Libera o cookie de login
+   */
+  cookie_release() {
     this.TokenExpires = 0;
     document.cookie = this.cookieName + '=; expires=' + new Date(0).toUTCString() + '; path=/;';
   }
@@ -165,19 +167,33 @@ class WebLogin {
   }
 
   parseJSONLogin(json) {
+    this.Data = {};
+    this.ServerToken = false;
+    this.TokenExpires = 0;
     if (typeof (json) === 'string') {
       json = JSON.parse(json);
     }
-    if (typeof (json['token']) === 'undefined' || typeof (json['expires']) === 'undefined') {
-      // Erro no token
-      this.status = 2;
-      this.doCallBack("parseJSONLogin ERRO NO TOKEN");
+    if (this.CheckToken(json, 'token') && this.CheckToken(json, 'expires') && this.CheckToken(json, 'message')) {
+      // Retorno normal
+      this.Data = this.CheckToken('data', {});
+      if (json.expires == 0) {
+        // Login falhou        
+        this.Data.Message = json.message;
+        this.cookie_release();
+        this.status = this.wlConsts.loginStatus_login_error;
+        this.doCallBack(this.wlConsts.loginError);
+      } else {
+        // Login Ok
+        this.ServerToken = json.token;
+        this.TokenExpires = this.parseExpires(json.expires);
+        this.status = this.wlConsts.loginStatus_login_ok;
+        this.cookie_save();
+        this.doCallBack(this.wlConsts.loginOK);
+      }
     } else {
-      this.ServerToken = json.token;
-      this.TokenExpires = Date.parse(json.expires);
-      this.status = 1;
-      this.cookie_save();
-      this.doCallBack("parseJSONLogin OK");
+      // Erro na leitura do login      
+      this.status = this.wlConsts.loginStatus_login_error;
+      this.doCallBack(this.wlConsts.loginStatus_login_error);
     }
   }
 
@@ -221,10 +237,10 @@ class WebLogin {
 
   DoLogout() {
     if (this.ServerToken) {
-      this.fetchJSON(this.LoginURL, (success, json) => {
+      this.fetchJSON(this.LoginURL, (success) => {
         this.ServerToken = "";
         this.TokenExpires = 0;
-        this.cookieRelease();
+        this.cookie_release();
         this.doCallBack("Logout:" + success);
       }, "GET", "logout=" + this.ServerToken)
     }
@@ -239,7 +255,7 @@ class WebLogin {
         } else {
           this.ServerToken = false;
           this.TokenExpires = 0;
-          document.cookie = this.CookieName + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          this.cookie_release();
           this.doCallBack(this.wlConsts.serverLogout);
         }
       })
