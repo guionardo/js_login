@@ -1,27 +1,29 @@
-const { src, dest, parallel } = require('gulp');
+const { src, dest, parallel,series } = require('gulp');
 const pug = require('gulp-pug');
 const less = require('gulp-less');
 const minifyCSS = require('gulp-csso');
 const concat = require('gulp-concat');
+//const eslint = require('gulp-eslint');
 
 function html() {
-  return src('client/templates/*.pug')
+  return src('html/*.pug')
     .pipe(pug())
-    .pipe(dest('build/html'))
+    .pipe(dest('build'))
 }
 
 function css() {
   return src('client/templates/*.less')
     .pipe(less())
     .pipe(minifyCSS())
-    .pipe(dest('build/css'))
+    .pipe(dest('build'))
 }
 
 function js() {
-  return src('client/javascript/*.js', { sourcemaps: true })
+  return src('js/*.js', { sourcemaps: true })
     .pipe(concat('app.min.js'))
-    .pipe(dest('build/js', { sourcemaps: true }))
+    .pipe(dest('build', { sourcemaps: true }))
 }
+
 
 exports.js = js;
 exports.css = css;
